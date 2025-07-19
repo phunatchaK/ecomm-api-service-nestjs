@@ -17,7 +17,7 @@ import { ProductModule } from './modules/product/product.module';
       useFactory: async (
         configService: ConfigService,
       ): Promise<TypeOrmModuleOptions> => ({
-        type: configService.get<string>('database.type') as 'postgres',
+        type: 'postgres',
         host: configService.get<string>('database.host'),
         port: configService.get<number>('database.port'),
         username: configService.get<string>('database.username'),
