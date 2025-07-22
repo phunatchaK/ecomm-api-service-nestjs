@@ -8,18 +8,24 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
+import { WarehouseEntity } from 'src/modules/warehouse/domain/entities/warehouse.entity';
+import { join } from 'path';
 
-@Entity('product_stock_layers')
+@Entity('product_stock')
 export class ProductStock {
   @PrimaryGeneratedColumn()
-  layer_id: number;
+  stock_id: number;
 
-  @ManyToOne(() => Product, (product) => product.stock_layers)
+  @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
   @Column({ type: 'int' })
   available_qty: number;
+
+  @ManyToOne(() => WarehouseEntity)
+  @JoinColumn({ name: 'warehouse_id' })
+  warehouse: WarehouseEntity;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   unit_cost: number;

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductStock } from './product-stock-layer.entity';
+import { ProductStock } from './product-stock.entity';
 
 @Entity('products')
 export class Product {
@@ -27,9 +27,6 @@ export class Product {
 
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
-
-  @OneToMany(() => ProductStock, (layer) => layer.product)
-  stock_layers: ProductStock[];
 
   @CreateDateColumn()
   created_at: Date;

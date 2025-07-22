@@ -7,6 +7,7 @@ import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ProductModule } from './modules/product/product.module';
+import { WarehouseController } from './modules/warehouse/interface/warehouse.controller';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { ProductModule } from './modules/product/product.module';
     AuthModule,
     ProductModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, WarehouseController],
   providers: [AppService],
 })
 export class AppModule {}

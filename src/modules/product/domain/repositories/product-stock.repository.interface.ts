@@ -1,4 +1,4 @@
-import { ProductStock } from '../entities/product-stock-layer.entity';
+import { ProductStock } from '../entities/product-stock.entity';
 
 export interface IStockMovementRepository {
   getFifo(productId: number): Promise<ProductStock[]>;

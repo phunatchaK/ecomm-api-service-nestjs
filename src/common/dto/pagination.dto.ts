@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsPositive, Min } from 'class-validator';
+import { IsOptional, IsPositive, IsString, Min } from 'class-validator';
 import { PAGINATION } from '../constants/pagination.constant';
 
 export class PaginationQueryDTO {
@@ -12,4 +12,8 @@ export class PaginationQueryDTO {
   @Type(() => Number)
   @Min(1)
   limit: number = PAGINATION.DEFAULT_LIMIT;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

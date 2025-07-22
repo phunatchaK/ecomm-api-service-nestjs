@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ProductStock } from '../../domain/entities/product-stock.entity';
 import { IStockMovementRepository } from '../../domain/repositories/product-stock.repository.interface';
-import { ProductStock } from '../../domain/entities/product-stock-layer.entity';
 
 @Injectable()
 export class StockMovementRepository implements IStockMovementRepository {

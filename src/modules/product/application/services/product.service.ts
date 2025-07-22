@@ -1,16 +1,11 @@
-import {
-  Injectable,
-  BadRequestException,
-  Inject,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { ProductStock } from '../../domain/entities/product-stock.entity';
 import { IStockMovementRepository } from '../../domain/repositories/product-stock.repository.interface';
 import { IProductRepository } from '../../domain/repositories/product.repository.interface';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { StockMovementDto, StockMovementType } from '../dto/stock-movement.dto';
-import { DataSource } from 'typeorm';
-import { ProductStock } from '../../domain/entities/product-stock-layer.entity';
-import { NotFoundError } from 'rxjs';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -22,7 +17,7 @@ export class ProductService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getAllProdcuts(
+  async getAllProducts(
     page: number,
     limit: number,
     search?: string,
@@ -32,7 +27,9 @@ export class ProductService {
   }
 
   async getProductById(productId: number) {
-    return this.productRepo.findProductById(productId);
+    const product = this.productRepo.findProductById(productId);
+    if (!product) throw new BadRequestException('Product not found');
+    return product;
   }
 
   async createProduct(createDto: CreateProductDto) {
@@ -41,15 +38,36 @@ export class ProductService {
     return this.productRepo.createOrEditProduct(createDto);
   }
 
+  async editProductdetailByProductId(
+    productId: number,
+    updateDto: UpdateProductDto,
+  ) {
+    const product = await this.productRepo.findProductById(productId);
+    if (!product) throw new BadRequestException('Product not found');
+
+    if (updateDto.sku && updateDto.sku !== product.sku) {
+      const skuExist = await this.productRepo.findProductBySku(updateDto.sku);
+      if (skuExist) throw new BadRequestException('Sku already exitss');
+    }
+
+    return this.productRepo.createOrEditProduct({
+      ...product,
+      ...updateDto,
+      product_id: productId,
+    });
+  }
+
   async updateStock(updateDto: StockMovementDto) {
-    if (updateDto.movement_type == StockMovementType.PURCHASE_IN) {
+    if (updateDto.movement_type === StockMovementType.PURCHASE_IN) {
       return this.purchaseIn(
         updateDto.productId,
         updateDto.quantity,
         updateDto.unit_cost,
       );
-    } else {
+    } else if (updateDto.movement_type === StockMovementType.PURCHASE_OUT) {
       return this.purchaseOut(updateDto.productId, updateDto.quantity);
+    } else {
+      throw new BadRequestException('Invalid stock movement type');
     }
   }
 
@@ -62,7 +80,7 @@ export class ProductService {
   }
 
   private async purchaseOut(productId: number, qty: number) {
-    return this.dataSource.transaction(async (manager) => {
+    return this.dataSource.transaction(async () => {
       let remainQty = qty;
       const fifos = await this.stockMoveRepo.getFifo(productId);
 
@@ -86,19 +104,5 @@ export class ProductService {
 
       return { productId, qty };
     });
-  }
-
-  async deactivateProduct(productId: number) {
-    const product = await this.productRepo.findProductById(productId);
-
-    if (!product) throw new NotFoundException('Product not found');
-
-    if (product.stock_qty > 0)
-      throw new BadRequestException(
-        'Cannot deactivate product with remaining stock',
-      );
-
-    await this.productRepo.deactivateProduct(productId);
-    return { success: true };
   }
 }

@@ -2,7 +2,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../domain/entities/product.entity';
 import { IProductRepository } from '../../domain/repositories/product.repository.interface';
-import { NotFoundException } from '@nestjs/common';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -61,28 +60,5 @@ export class ProductRepository implements IProductRepository {
     return this.productRepo.findOne({ where: { sku } });
   }
 
-  // async findProductByIdOrFail(productId: number): Promise<Product> {
-  //   const product = await this.productRepo.findOne({
-  //     where: { product_id: productId },
-  //   });
-  //   if (!product) throw new NotFoundException('Product not found ');
-  //   return product;
-  // }
 
-  async editProduct(
-    productId: number,
-    payload: Partial<Product>,
-  ): Promise<Product | null> {
-    await this.productRepo.update(productId, payload);
-    return this.findProductById(productId);
-  }
-
-  async deactivateProduct(productId: number): Promise<void> {
-    await this.productRepo
-      .createQueryBuilder()
-      .update(Product)
-      .set({ is_active: false })
-      .where(`product_id = :productId`, { productId })
-      .execute();
-  }
 }

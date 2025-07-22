@@ -11,9 +11,4 @@ export interface IProductRepository {
   findProductBySku(sku: string): Promise<Product | null>;
   createOrEditProduct(product: Partial<Product>): Promise<Product>;
   updateStock(productId: number, qty: number): Promise<void>;
-  editProduct(
-    productId: number,
-    payload: Partial<Product>,
-  ): Promise<Product | null>;
-  deactivateProduct(productId: number): Promise<void>;
 }
