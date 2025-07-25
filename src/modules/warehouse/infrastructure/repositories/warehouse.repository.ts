@@ -6,6 +6,7 @@ import { WarehouseMapper } from '../mappers/warehouse.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { ProductStock } from 'src/modules/product/domain/entities/product-stock.entity';
+import { applyPaginationAndSorting } from 'src/common/helpers/pagination.helper';
 
 @Injectable()
 export class WarehouseRepository implements IWarehouseRepository {
@@ -17,7 +18,7 @@ export class WarehouseRepository implements IWarehouseRepository {
 
   async findAllWarehouse(): Promise<WarehouseModel[]> {
     const result = await this.warehouseRepo.find({ where: { is_active: true } });
-    return result.map((r) => WarehouseMapper.toModel(r));
+    return WarehouseMapper.toModels(result);
   }
 
   async findWarehouseByWarehouseId(warehouseId: number): Promise<WarehouseModel | null> {
@@ -30,23 +31,20 @@ export class WarehouseRepository implements IWarehouseRepository {
     return result ? WarehouseMapper.toModel(result) : null;
   }
 
-  async findWarehouseByCondition(condition: {
-    page: number;
-    limit: number;
-    search?: string;
-  }): Promise<[WarehouseModel[], number]> {
-    const qb = this.warehouseRepo.createQueryBuilder('w');
-    if (condition.search) {
-      qb.andWhere(`w.name ILIKE :search OR w.location ILIKE :search`, { search: condition.search });
-    }
+  async findWarehouseByCondition(
+    page: number,
+    limit: number,
+    search?: string,
+    isActive: boolean = true
+  ): Promise<[WarehouseModel[], number]> {
+    const qb = this.warehouseRepo.createQueryBuilder('w').where(`w.is_active = :isActive`, { isActive: isActive });
 
-    qb.andWhere(`w.is_active = true`);
+    if (search) qb.andWhere(`(w.name ILIKE :search OR w.location ILIKE :search)`, { search: `%${search}%` });
 
-    qb.skip((condition.page - 1) * condition.limit);
-    qb.limit(condition.limit);
+    applyPaginationAndSorting(qb, page, limit, 'w.created_at:desc');
 
     const [entity, total] = await qb.getManyAndCount();
-    return [entity.map(WarehouseMapper.toModel), total];
+    return [WarehouseMapper.toModels(entity), total];
   }
 
   async createWarehouse(warehouseModel: WarehouseModel): Promise<WarehouseModel> {
@@ -55,7 +53,7 @@ export class WarehouseRepository implements IWarehouseRepository {
     return WarehouseMapper.toModel(save);
   }
 
-  async udpateWarehouse(warehouseModel: WarehouseModel): Promise<WarehouseModel> {
+  async updateWarehouse(warehouseModel: WarehouseModel): Promise<WarehouseModel> {
     const entity = WarehouseMapper.toEntity(warehouseModel);
     const update = await this.warehouseRepo.save(entity);
     return WarehouseMapper.toModel(update);

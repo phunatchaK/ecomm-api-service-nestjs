@@ -16,4 +16,8 @@ export class PaginationQueryDTO {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  orderBy?: string;
 }

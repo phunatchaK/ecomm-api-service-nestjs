@@ -8,27 +8,27 @@ export class WarehouseModel {
     private updatedAt: Date
   ) {}
 
-  getWarehouseId(): number {
+  getWarehouseId() {
     return this.warehouseId;
   }
 
-  getName(): string {
+  getName() {
     return this.name;
   }
 
-  getLocation(): string {
+  getLocation() {
     return this.location;
   }
 
-  isActived(): boolean {
+  isActived() {
     return this.isActive;
   }
 
-  getCreatedAt(): Date {
+  getCreatedAt() {
     return this.createdAt;
   }
 
-  getUpdatedAt(): Date {
+  getUpdatedAt() {
     return this.updatedAt;
   }
 
@@ -47,6 +47,12 @@ export class WarehouseModel {
   deactivate(): void {
     if (!this.isActive) throw new Error('Warehouse is already deactivated');
     this.isActive = false;
+    this.touch();
+  }
+
+  changeName(newName: string): void {
+    if (!newName || newName.trim() === '') throw new Error('Name cannot be empty');
+    this.name = newName;
     this.touch();
   }
 

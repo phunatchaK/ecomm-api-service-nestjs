@@ -13,6 +13,10 @@ export class WarehouseMapper {
     );
   }
 
+  static toModels(warehouseEntitys: WarehouseEntity[]): WarehouseModel[] {
+    return warehouseEntitys.map(this.toModel);
+  }
+
   static toEntity(model: WarehouseModel): WarehouseEntity {
     const entity = new WarehouseEntity();
     entity.warehouse_id = model.getWarehouseId();
